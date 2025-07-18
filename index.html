@@ -2,123 +2,135 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Suit Battle Online - Bella & Putra</title>
+  <title>Suit Online Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
-    body { font-family: Arial; background: #111; color: #fff; text-align: center; padding: 20px; }
-    input, button { padding: 10px; margin: 5px; }
-    .hidden { display: none; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #loginDiv, #gameDiv { max-width: 400px; margin: auto; }
+    input { display: block; margin: 10px auto; padding: 10px; width: 80%; }
+    button { padding: 10px 20px; margin: 10px; font-size: 18px; }
+    #status { font-size: 20px; margin-top: 20px; color: #333; }
+    #timer { font-weight: bold; color: #d00; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div id="loginBox">
-    <h2>Login Mabar Private</h2>
-    <input id="username" placeholder="Username" /><br/>
-    <input id="password" type="password" placeholder="Password" /><br/>
-    <button onclick="login()">Login</button>
+  <h1>Suit Online Realtime ✅</h1>
+
+  <!-- Login -->
+  <div id="loginDiv">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username (player1/player2)">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <p id="loginMsg" style="color:red;"></p>
   </div>
 
-  <div id="gameBox" class="hidden">
-    <h2>Suit Battle: <span id="youName"></span> vs <span id="enemyName"></span></h2>
-    <p>Saldo: <span id="yourSaldo">1000</span></p>
-    <p>Status: <span id="statusText">Menunggu...</span></p>
-    <button onclick="choose('batu')">🪨 Batu</button>
-    <button onclick="choose('gunting')">✂️ Gunting</button>
-    <button onclick="choose('kertas')">📄 Kertas</button>
-    <div id="result" style="margin-top:10px;"></div>
+  <!-- Game -->
+  <div id="gameDiv" style="display:none;">
+    <div>
+      <button onclick="choose('batu')" id="btnBatu">🪨 Batu</button>
+      <button onclick="choose('gunting')" id="btnGunting">✂️ Gunting</button>
+      <button onclick="choose('kertas')" id="btnKertas">📄 Kertas</button>
+    </div>
+    <h2 id="timer">Waktu memilih: 10</h2>
+    <div id="status">Menunggu pilihan...</div>
   </div>
 
-  <script>
-    // ✅ Firebase Config
-    const firebaseConfig = {
-  apiKey: "AIzaSyCxOh9gSsp6KgBMhOVQ5KNqy-5KUWHkFm0",
-  authDomain: "suit-online-a0ec5.firebaseapp.com",
-  projectId: "suit-online-a0ec5",
-  storageBucket: "suit-online-a0ec5.firebasestorage.app",
-  messagingSenderId: "306492434790",
-  appId: "1:306492434790:web:933bddc665938dc81d00a7",
-  measurementId: "G-30WX96VQBN"
-}
+<script>
+  // === Firebase Config sementara ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyXXXX-FAKEKEY-1234567890",
+    authDomain: "suit-demo-xxxx.firebaseapp.com",
+    databaseURL: "https://suit-demo-xxxx-default-rtdb.firebaseio.com",
+    projectId: "suit-demo-xxxx",
+    storageBucket: "suit-demo-xxxx.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abcdefabcdef"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  // === Akun login sederhana ===
+  const accounts = {
+    "player1": "123",
+    "player2": "456"
+  };
 
-    let user = "";
-    let opponent = "";
-    const room = "room_bella_putra";
-    let saldo = 1000;
+  let playerId = "";
+  const roomId = "room-demo";
+  const roomRef = db.ref("suit/" + roomId);
+  let countdown = 10, interval, alreadyChosen = false;
 
-    function login() {
-      const u = document.getElementById("username").value.trim();
-      const p = document.getElementById("password").value.trim();
+  function login() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value.trim();
 
-      if ((u === "putra" && p === "12345") || (u === "bella" && p === "12345")) {
-        user = u;
-        opponent = u === "putra" ? "bella" : "putra";
-        document.getElementById("loginBox").classList.add("hidden");
-        document.getElementById("gameBox").classList.remove("hidden");
-        document.getElementById("youName").innerText = user;
-        document.getElementById("enemyName").innerText = opponent;
-        listenGame();
-        resetChoice();
-      } else {
-        alert("Login gagal! Hanya untuk Bella & Putra ❤️");
+    if (accounts[user] && accounts[user] === pass) {
+      playerId = user;
+      document.getElementById("loginDiv").style.display = "none";
+      document.getElementById("gameDiv").style.display = "block";
+      startTimer();
+    } else {
+      document.getElementById("loginMsg").innerText = "❌ Username/Password salah!";
+    }
+  }
+
+  function startTimer() {
+    countdown = 10;
+    document.getElementById("timer").innerText = `Waktu memilih: ${countdown}`;
+    interval = setInterval(() => {
+      countdown--;
+      document.getElementById("timer").innerText = `Waktu memilih: ${countdown}`;
+      if (countdown <= 0) {
+        clearInterval(interval);
+        if (!alreadyChosen) choose("tidak_pilih");
       }
-    }
+    }, 1000);
+  }
 
-    function choose(pilihan) {
-      db.ref(`${room}/${user}`).set({ choice: pilihan, saldo: saldo });
-      document.getElementById("statusText").innerText = "Menunggu lawan memilih...";
-    }
+  function disableButtons() {
+    document.querySelectorAll("#gameDiv button").forEach(b => b.disabled = true);
+  }
+  function enableButtons() {
+    document.querySelectorAll("#gameDiv button").forEach(b => b.disabled = false);
+  }
 
-    function listenGame() {
-      db.ref(`${room}`).on("value", (snap) => {
-        const data = snap.val();
-        if (!data) return;
+  function choose(choice) {
+    alreadyChosen = true;
+    disableButtons();
+    roomRef.child(playerId).set(choice);
+    document.getElementById("status").innerText = `Kamu memilih: ${choice}`;
+  }
 
-        const my = data[user];
-        const enemy = data[opponent];
+  function checkWinner(p1, p2) {
+    if (p1 === p2) return "Seri!";
+    if (p1 === "tidak_pilih") return "Player2 menang (Player1 tidak pilih)";
+    if (p2 === "tidak_pilih") return "Player1 menang (Player2 tidak pilih)";
+    if ((p1==="batu"&&p2==="gunting")||(p1==="gunting"&&p2==="kertas")||(p1==="kertas"&&p2==="batu"))
+      return "Player1 menang!";
+    return "Player2 menang!";
+  }
 
-        if (my && enemy && my.choice && enemy.choice) {
-          const hasil = hitungHasil(my.choice, enemy.choice);
-          let teks = `Kamu: ${my.choice} vs ${enemy.choice}<br/>`;
-
-          if (hasil === "menang") {
-            saldo += 100;
-            teks += "✅ Kamu Menang!";
-          } else if (hasil === "kalah") {
-            saldo -= 100;
-            teks += "❌ Kamu Kalah!";
-          } else {
-            teks += "🤝 Seri!";
-          }
-
-          document.getElementById("result").innerHTML = teks;
-          document.getElementById("yourSaldo").innerText = saldo;
-          document.getElementById("statusText").innerText = "Main lagi yuk!";
-          resetChoice();
-        }
-      });
-    }
-
-    function resetChoice() {
+  // Pantau realtime
+  roomRef.on("value", snap => {
+    const data = snap.val() || {};
+    const p1 = data.player1, p2 = data.player2;
+    if (p1 && p2) {
+      clearInterval(interval);
+      const result = checkWinner(p1, p2);
+      document.getElementById("status").innerText =
+        `Player1: ${p1} — Player2: ${p2} → ${result}`;
       setTimeout(() => {
-        db.ref(`${room}/putra`).set(null);
-        db.ref(`${room}/bella`).set(null);
+        roomRef.set({});
+        document.getElementById("status").innerText = "Ronde baru! Pilih lagi...";
+        alreadyChosen = false;
+        enableButtons();
+        startTimer();
       }, 3000);
     }
-
-    function hitungHasil(kamu, dia) {
-      if (kamu === dia) return "seri";
-      if (
-        (kamu === "batu" && dia === "gunting") ||
-        (kamu === "gunting" && dia === "kertas") ||
-        (kamu === "kertas" && dia === "batu")
-      ) return "menang";
-      return "kalah";
-    }
-  </script>
+  });
+</script>
 </body>
 </html>
