@@ -3,23 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suit Mabar Romantis 💖</title>
+  <title>Suit Mabar Pacar 💖</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="assets/images/heart.png">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>💖 SUIT MABAR PACAR 💖</h1>
     
-    <!-- Mode Pilihan -->
-    <div class="mode-select">
-      <button id="single-mode">Lawan Bot</button>
-      <button id="multi-mode">2 Player</button>
-    </div>
-
     <!-- Pemain 1 -->
     <div class="player" id="player1">
-      <h2><img src="assets/images/heart.png" class="icon"> Kamu</h2>
+      <h2>Kamu</h2>
       <div class="progress-bar" id="player1-timer-bar"></div>
       <p class="timer" id="player1-timer">10s</p>
       <div class="choices">
@@ -31,8 +27,8 @@
     </div>
 
     <!-- Pemain 2 -->
-    <div class="player hidden" id="player2">
-      <h2><img src="assets/images/heart.png" class="icon"> Pacar</h2>
+    <div class="player" id="player2">
+      <h2>Pacar</h2>
       <div class="progress-bar" id="player2-timer-bar"></div>
       <p class="timer" id="player2-timer">10s</p>
       <div class="choices">
@@ -45,13 +41,8 @@
 
     <!-- Hasil -->
     <div class="result">
-      <div id="vs">VS</div>
-      <div class="choices-display">
-        <span id="player1-display">?</span>
-        <span id="player2-display">?</span>
-      </div>
       <p id="result-text">Ayo mainkan!</p>
-      <button id="reset" class="hidden">Main Lagi 💖</button>
+      <button id="reset">Main Lagi 💖</button>
     </div>
 
     <!-- Skor -->
@@ -61,13 +52,19 @@
     </div>
   </div>
 
-  <!-- Audio -->
-  <audio id="click-sound" src="assets/sounds/click.mp3"></audio>
-  <audio id="win-sound" src="assets/sounds/win.mp3"></audio>
-  <audio id="lose-sound" src="assets/sounds/lose.mp3"></audio>
-  <audio id="draw-sound" src="assets/sounds/draw.mp3"></audio>
-  <audio id="tick-sound" src="assets/sounds/tick-tock.mp3"></audio>
-  <audio id="bg-music" loop src="assets/images/bg-music.mp3"></audio>
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB...",  // Ganti dengan config Firebase Anda
+      authDomain: "game-suit-pacar.firebaseapp.com",
+      databaseURL: "https://game-suit-pacar-default-rtdb.firebaseio.com",
+      projectId: "game-suit-pacar",
+      storageBucket: "game-suit-pacar.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcd1234"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 
   <script src="script.js"></script>
 </body>
